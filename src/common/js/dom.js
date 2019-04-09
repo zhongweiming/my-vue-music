@@ -12,3 +12,11 @@ export function hasClass (el, className) {
     return true
   }
 }
+
+export function setDate (el, name, val) {
+  el.setAttribute('data-' + name, val)
+}
+
+export function getDate (el, name) {
+  return el.getAttribute('data-' + name)
+}
