@@ -131,6 +131,10 @@ export default {
       this.scrollY = -this.listHeight[index]
       this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0)
     },
+    refresh () {
+      // 并不是要获取组件中的 dom,只是要获取 scroll 组件而已,所以不需要$el
+      this.$refs.listview.refresh()
+    },
     _caculateHeight () { // 计算各个列表的高度
       this.listHeight = []
       const list = this.$refs.listGroup

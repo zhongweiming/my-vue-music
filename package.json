@@ -14,6 +14,8 @@
     "axios": "^0.18.0",
     "babel-runtime": "^6.26.0",
     "better-scroll": "^1.15.1",
+    "body-parser": "^1.18.3",
+    "create-keyframe-animation": "^0.1.0",
     "express": "^4.16.4",
     "fastclick": "^1.0.6",
     "jsonp": "^0.2.1",
@@ -22,7 +24,9 @@
     "vue": "^2.5.2",
     "vue-lazyload": "^1.2.6",
     "vue-router": "^3.0.1",
-    "vuex": "^3.1.0"
+    "vuex": "^3.1.0",
+    "js-base64": "latest",
+    "lyric-parser": "^1.0.1"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
