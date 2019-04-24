@@ -48,7 +48,7 @@ export function createSong (musicData) {
 }
 
 // 抽象出一个方法来拼接歌手,这样就可以直接用了,而不用再处理歌手名字
-function getAllSingers (singers) {
+export function getAllSingers (singers) {
   let ret = []
   if (!singers) {
     return ''

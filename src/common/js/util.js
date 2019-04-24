@@ -17,3 +17,16 @@ export function shuffle (arr) {
   }
   return newArr
 }
+// 节流函数
+export function debounce (func, delay) {
+  let timer
+  // 传给 func 的参数可以被下面这个 args 接收？
+  return function (...args) {
+    if (timer) {
+      clearTimeout(timer)
+    }
+    timer = setTimeout(() => {
+      func.apply(this, args)
+    }, delay)
+  }
+}
