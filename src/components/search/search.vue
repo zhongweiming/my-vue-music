@@ -4,7 +4,7 @@
       <search-box @query="handleQuery" ref="searchBox"></search-box>
     </div>
     <div class="shortcut-wrapper" ref="shortcutWrapper" v-show="!keyword">
-      <scroll class="shortcut" :data="shortcut" ref="shortcut">
+      <scroll :refreshDelay="refreshDelay" class="shortcut" :data="shortcut" ref="shortcut">
         <div>
           <div class="hot-key">
             <h1 class="title">热门搜索</h1>
@@ -42,13 +42,13 @@ import { ERR_OK } from '../../api/config'
 import Suggest from 'components/suggest/suggest'
 import SearchList from 'base/search-list/search-list'
 import Confirm from 'base/confirm/confirm'
-import {mapActions, mapGetters} from 'vuex'
+import {mapActions} from 'vuex'
 import Scroll from '../../base/scroll/scroll'
-import { playlistMixin } from '../../common/js/mixin'
+import { playlistMixin, searchMixin } from '../../common/js/mixin'
 
 export default {
   name: 'Search',
-  mixins: [playlistMixin],
+  mixins: [playlistMixin, searchMixin],
   components: {
     Scroll,
     SearchBox,
@@ -62,37 +62,17 @@ export default {
   data () {
     return {
       hotKey: [],
-      keyword: '',
       alertText: '确定清空所有搜索历史吗'
     }
   },
   computed: {
     shortcut () {
       return this.hotKey.concat(this.searchHistory)
-    },
-    ...mapGetters([
-      'searchHistory'
-    ])
+    }
   },
   methods: {
-    handleQuery (keyword) {
-      this.keyword = keyword
-    },
     clickHot (hot) {
       this.$refs.searchBox.setKeyword(hot)
-    },
-    blurInput () {
-      this.$refs.searchBox.blur()
-    },
-    saveSearch () {
-      this.saveSearchHistory(this.keyword)
-    },
-    clickSearchHistory (keyword) {
-      // 当搜索历史中的关键字被点击时做两件事
-      // 1.将关键字填入搜索框中
-      // 2.将关键字保存在搜索历史中，主要是为了让这个关键字提前到第一个搜索历史，更加合理
-      this.$refs.searchBox.setKeyword(keyword)
-      this.saveSearchHistory(keyword)
     },
     showConfirm () {
       this.$refs.confirm.show()
@@ -114,8 +94,6 @@ export default {
       })
     },
     ...mapActions([
-      'saveSearchHistory',
-      'deleteSearchHistory',
       'clearSearchHistory'
     ])
   },

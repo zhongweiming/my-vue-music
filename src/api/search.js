@@ -11,7 +11,7 @@ export function getHotKey () {
   return jsonp(url, data, options)
 }
 
-export function search (keyword, page, perpage) { // page 为搜索结果页
+export function search (keyword, page, zhida, perpage) { // page 为搜索结果页
   const url = '/api/search'
   const data = Object.assign({}, commonParams, {
     platform: 'h5',
@@ -20,7 +20,7 @@ export function search (keyword, page, perpage) { // page 为搜索结果页
     perpage,
     n: perpage,
     zhidaqu: 1,
-    catZhida: 1,
+    catZhida: zhida ? 1 : 0,
     t: 0,
     flag: 1,
     ie: 'utf-8',

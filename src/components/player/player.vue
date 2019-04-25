@@ -89,11 +89,12 @@
             <i :class="miniIcon" @click.stop="miniTogglePlaying" class="icon-mini"></i>
           </progress-circle>
         </div>
-        <div class="control">
+        <div class="control" @click.stop="showPlaylist">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
+    <playlist ref="playlist"></playlist>
     <audio ref="audio" :src="currentSong.url" @canplay="ready"
            @error="error" @timeupdate="updateTime"
            @ended="end"></audio>
@@ -101,24 +102,27 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import animations from 'create-keyframe-animation'
 import {prefixStyle} from '../../common/js/dom'
 import ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
 import { playMode } from '../../common/js/config'
-import { shuffle } from '../../common/js/util'
 import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
+import Playlist from 'components/playlist/playlist'
+import {playerMixin} from '../../common/js/mixin'
 
 const transform = prefixStyle('transform')
 const transitionDuration = prefixStyle('transitionDuration')
 export default {
   name: 'player',
+  mixins: [playerMixin],
   components: {
     ProgressBar,
     ProgressCircle,
-    Scroll
+    Scroll,
+    Playlist
   },
   created () {
     // 可以在 created 中定义因为这个变量并不需要有 getter 和 setter?
@@ -150,19 +154,11 @@ export default {
     },
     ...mapGetters([
       'fullScreen',
-      'playlist',
-      'currentSong',
       'playing',
-      'currentIndex',
-      'mode',
-      'sequenceList'
+      'currentIndex'
     ]),
     disableCls () {
       return this.songReady ? '' : 'disable'
-    },
-    iconMode () {
-      return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop'
-        : 'icon-random'
     }
   },
   methods: {
@@ -225,6 +221,9 @@ export default {
     miniTogglePlaying () {
       this.setPlayingState(!this.playing)
     },
+    showPlaylist () {
+      this.$refs.playlist.show()
+    },
     _getPosAndScale () {
       // 这里为了有一个从小图变大图的动画效果,其实就是让大图一开始的位置处于小图位置(点击歌曲或者点击mini 都会有这个效果),
       // 然后慢慢回到原来的位置,这里的 x 和 y 都是相对于原来的位置偏移的距离,所以一个为正一个为负!
@@ -251,12 +250,11 @@ export default {
         scale
       }
     },
+    ...mapActions([
+      'savePlayHistory'
+    ]),
     ...mapMutations({
-      setFullScreen: 'SET_FULL_SCREEN',
-      setPlayingState: 'SET_PLAYING_STATE',
-      setCurrentIndex: 'SET_CURRENT_INDEX',
-      setPlayMode: 'SET_PLAY_MODE',
-      setPlaylist: 'SET_PLAYLIST'
+      setFullScreen: 'SET_FULL_SCREEN'
     }),
     prev () {
       if (!this.songReady) {
@@ -300,6 +298,7 @@ export default {
     ready () {
       // 歌曲加载好之后设置为 true
       this.songReady = true
+      this.savePlayHistory(this.currentSong)
     },
     error () {
       this.songReady = true
@@ -316,22 +315,6 @@ export default {
       if (this.currentLyric) {
         this.currentLyric.seek(currentTime * 1000)
       }
-    },
-    changeMode () {
-      let mode = (this.mode + 1) % 3
-      this.setPlayMode(mode)
-      let list = null
-      if (mode === playMode.random) {
-        // 打乱播放列表,注意此时这个 sequenceList 也会跟着改变
-        // 这个时候是有问题的,因为 sequenceList 改变的话,下一次切换回顺序播放,列表还是上一次的随机播放列表
-        // 需要改一下函数,把 shuffle 改一下,改成不会改变原数组,yeah
-        list = shuffle(this.sequenceList)
-      } else {
-        list = this.sequenceList
-      }
-      // 调用之后 index 变为新列表表示当前歌曲的那个 index
-      this.resetCurrentIndex(list)
-      this.setPlaylist(list)
     },
     end () {
       if (this.mode === playMode.loop) {
@@ -425,12 +408,6 @@ export default {
         this.currentLyric.seek(0)
       }
     },
-    resetCurrentIndex (list) {
-      let index = list.findIndex((item) => {
-        return item.id === this.currentSong.id
-      })
-      this.setCurrentIndex(index)
-    },
     // 将时间间隔转换成需要的格式
     format (interval) {
       // 向下取整
@@ -451,6 +428,10 @@ export default {
   },
   watch: {
     currentSong (newSong, oldSong) {
+      // 如果这个 currentSong 为空，也不用往下执行了，当播放列表清空的时候就会出现这种情况
+      if (!newSong.id || !oldSong.id) {
+        return
+      }
       // 做一个判断,如果说新歌和旧歌的 id 一样说明歌曲其实并没有改变,不需要执行里面的代码
       // 这个问题产生的原因就是切换播放模式为随机播放时需要改变 playlist 和 currentIndex 从而使得 currentSong 受影响,其实
       // 当前歌曲本身并没有改变

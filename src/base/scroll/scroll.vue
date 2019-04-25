@@ -33,6 +33,11 @@ export default {
     beforeScroll: {
       type: Boolean,
       default: false
+    },
+    // 是为了可以控制刷新 scroll 的延迟时间,用于transition-group 中动画过长导致的距离计算错误,不过我好像并没有这个问题
+    refreshDelay: {
+      type: Number,
+      default: 20
     }
   },
   mounted () {
@@ -92,7 +97,7 @@ export default {
     data () {
       setTimeout(() => {
         this.refresh()
-      }, 20)
+      }, this.refreshDelay)
     }
   }
 }

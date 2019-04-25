@@ -1,6 +1,7 @@
 <template>
   <transition name="confirm-fade">
-    <div class="confirm" v-show="showFlag">
+<!--    阻止事件冒泡到外面的其它组件，解决了点击清空播放列表时点任意地方整个播放列表消失的问题，就是事件冒泡-->
+    <div class="confirm" v-show="showFlag" @click.stop>
       <div class="confirm-wrapper">
         <div class="confirm-content">
           <p class="text">{{text}}</p>

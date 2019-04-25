@@ -47,6 +47,10 @@ export default {
     keyword: {
       type: String,
       default: ''
+    },
+    showSinger: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
@@ -75,7 +79,7 @@ export default {
       // 强制一开始搜索的时候从第一页开始
       // 设置了 标志位 flag，这个也就没必要设置了，直接用 this.page 即可，不必担心变为 2 了
       // let page = 1
-      search(this.keyword, this.page, perpage).then((res) => {
+      search(this.keyword, this.page, this.showSinger, perpage).then((res) => {
         if (res.code === ERR_OK) {
           this._geneResult(res.data, this.page).then((result) => {
             this.result = result
@@ -93,7 +97,7 @@ export default {
       }
       this.page++
       // console.log(this.page)
-      search(this.keyword, this.page, perpage).then((res) => {
+      search(this.keyword, this.page, this.showSinger, perpage).then((res) => {
         if (res.code === ERR_OK) {
           // console.log(this.page)
           this._geneResult(res.data, this.page).then((result) => {
