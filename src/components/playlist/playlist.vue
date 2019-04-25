@@ -17,8 +17,8 @@
                 @click="selectItem(item, index)">
               <i class="current" :class="getCurrentIcon(item)"></i>
               <span class="text">{{item.name}}</span>
-              <span class="like">
-                <i class="icon-not-favorite"></i>
+              <span class="like" @click.stop="toggleFavorite(item)">
+                <i :class="getFavoriteIcon(item)"></i>
               </span>
 <!--              不阻止冒泡会触发上面的 selectItem 造成一系列问题，我去！！！终于找到问题了-->
               <span class="delete" @click.stop="deleteOne(item)">
