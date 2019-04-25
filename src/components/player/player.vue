@@ -95,7 +95,7 @@
       </div>
     </transition>
     <playlist ref="playlist"></playlist>
-    <audio ref="audio" :src="currentSong.url" @canplay="ready"
+    <audio ref="audio" :src="currentSong.url" @play="ready"
            @error="error" @timeupdate="updateTime"
            @ended="end"></audio>
   </div>
@@ -282,6 +282,8 @@ export default {
       }
       if (this.playlist.length === 1) {
         this.loop()
+        // 因为只有一首歌的时候设置成循环播放,此时不会触发 play 事件,所以 songReady 一直为 false 了,这里直接 return
+        return
       } else {
         let index = this.currentIndex + 1
         if (index === this.playlist.length) {
@@ -325,6 +327,9 @@ export default {
     },
     getLyric () {
       this.currentSong.getLyric().then((lyric) => {
+        if (this.currentSong.lyric !== lyric) {
+          return
+        }
         this.currentLyric = new Lyric(lyric, this.handleLyric)
         if (this.playing) {
           this.currentLyric.play()
@@ -448,7 +453,10 @@ export default {
       //   this.$refs.audio.play()
       //   this.getLyric()
       // })
-      setTimeout(() => {
+      if (this.timer) {
+        clearTimeout(this.timer)
+      }
+      this.timer = setTimeout(() => {
         this.$refs.audio.play()
         this.getLyric()
       }, 1000)
